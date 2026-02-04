@@ -9,10 +9,15 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+
     steps:
+      # Step 1: Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Step 2: Configure AWS credentials from GitHub Secrets
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -20,13 +25,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # 🔍 This shows EXACTLY which IAM user GitHub is using
+      # Step 3: Verify which AWS identity is being used (debug)
       - name: Verify AWS identity
         run: aws sts get-caller-identity
 
+      # Step 4: Deploy static site to S3
       - name: Deploy static site to S3
         run: |
           aws s3 sync . s3://twr-portfolio \
             --delete \
             --exclude ".git/*" \
-            --exclude ".github/*"
+            --exclude ".github/*" \
+            --exclude ".github/workflows/*"
