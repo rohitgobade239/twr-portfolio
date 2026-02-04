@@ -6,11 +6,8 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
 
     steps:
       - name: Checkout repository
@@ -23,7 +20,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Deploy static site to S3 bucket
+      # 🔍 This shows EXACTLY which IAM user GitHub is using
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity
+
+      - name: Deploy static site to S3
         run: |
           aws s3 sync . s3://twr-portfolio \
             --delete \
